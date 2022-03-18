@@ -2,21 +2,7 @@ var express = require('express');
 var router = express.Router();
 var { db_all, db_run, db_get } = require("../database/database.js")
 var { verifyUser, verifyToken } = require("../auth/verify.js");
-
-function handleRes(res, status, message, data) {
-    res.json({
-        "status": status,
-        "message": message,
-        "data": data
-    })
-}
-
-function handleError(res, err) {
-    res.json({
-        "status": 400,
-        "message": err.message
-    })
-}
+var {handleRes, handleError } = require("./handler.js");
 
 router.post("/", async function(req, res) {
     var data = req.body

@@ -2,6 +2,7 @@
 
 1. install the package
 ```
+cd DBMS_FinalProject
 yarn
 ```
 

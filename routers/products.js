@@ -2,21 +2,7 @@ var express = require('express');
 var router = express.Router();
 var { db_all, db_run, db_get } = require("../database/database.js")
 var { verifyUser, verifyToken } = require("../auth/verify.js");
-
-function handleRes(res, status, message, data) {
-    res.json({
-        "status": status,
-        "message": message,
-        "data": data
-    })
-}
-
-function handleError(res, err) {
-    res.json({
-        "status": 400,
-        "message": err.message
-    })
-}
+var {handleRes, handleError } = require("./handler.js");
 
 router.post("/", async function(req, res){
     var data = req.body;
@@ -91,8 +77,8 @@ router.patch("/:id", async function(req, res){
             params = [data.name, data.description, data.picture, data.inventory, data.startSaleTime, data.endSaleTime, userId, req.params.id];
             await db_run(sql, params)
             .then(async ({ID, result}) => {
-                sql = 'select id, name, type, email, phone from users where id = ?';
-                params = [userId];
+                sql = 'select id, name, description, picture, inventory, price, startSaleTime, endSaleTime from products where userId = ? and id = ?';
+                params = [userId, req.params.id];
                 await db_get(sql, params)
                 .then(result => {
                     handleRes(res, 200, "success", result);

@@ -1,9 +1,11 @@
 var express = require('express');
 var router = express.Router();
-var { db_all, db_run, db_get } = require("../database/database.js")
+var { db_all, db_run, db_get } = require("../database/database.js");
 var { verifyUser, verifyToken } = require("../auth/verify.js");
+var {handleRes, handleError } = require("./handler.js");
 var multer  = require('multer')
-var fs = require('fs')
+var fs = require('fs');
+const { lstat } = require('fs/promises');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -16,20 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-function handleRes(res, status, message, data) {
-    res.json({
-        "status": status,
-        "message": message,
-        "data": data
-    })
-}
 
-function handleError(res, err) {
-    res.json({
-        "status": 400,
-        "message": err.message
-    })
-}
 
 router.post('/', upload.single('file'), async function(req, res){
     if(!req.header('Authorization')){
@@ -38,14 +27,19 @@ router.post('/', upload.single('file'), async function(req, res){
     const token = req.header('Authorization').replace('Bearer ', '');
     await verifyToken(-1, token)
     .then(result => {
-        handleRes(res, 200, "success", {url: `${req.get('host')}/images/${req.file.originalname}`});
+        handleRes(res, 200, "success", {url: `${req.get('host')}/api/images/${req.file.originalname}`});
     }).catch(err => {
         handleError(res, err)
     })
 })
 
 router.get('/:IMAGE', async function(req, res) {
-    res.sendFile(`/Users/cby/iCloud/110-1/DBMS/project/codes/images/${req.params.IMAGE}`);
+    var image = __dirname.split('/');
+    image.pop();
+    image.push("images")
+    image.push(`${req.params.IMAGE}`)
+    image = image.join('/');
+    res.sendFile(image);
 })
 
 
